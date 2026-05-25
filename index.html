@@ -600,11 +600,10 @@ async function apiFetch(params) {
 }
 
 async function apiPost(body) {
-  const r = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  });
+  // Use GET to avoid CORS preflight issues with Google Apps Script
+  const action = body.action;
+  const params = new URLSearchParams({ action, body: JSON.stringify(body) });
+  const r = await fetch(API_URL + "?" + params);
   return r.json();
 }
 
