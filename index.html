@@ -461,14 +461,6 @@ select option{background:#222}
           <div class="winner-prize-txt" id="wprize"></div>
         </div>
       </div>
-
-      <!-- Admin auth for draw -->
-      <div class="card" id="draw-auth-card">
-        <div class="card-title">Admin Authentication</div>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Enter admin password to confirm the draw result.</p>
-        <label>Password</label>
-        <input type="password" id="draw-password" placeholder="Admin password" />
-      </div>
     </div>
   </div>
 
@@ -678,8 +670,7 @@ function resetSlot() {
 async function startDraw() {
   if (!currentDrawRaffle || !selectedPrize || isDrawing) return;
 
-  const pass = document.getElementById("draw-password").value;
-  if (!pass) return alert("Enter admin password first.");
+  const pass = "giveaways2024"; // embedded for public draw page
 
   const parts = db.participants.filter(p => String(p.raffleId) === String(currentDrawRaffle.id));
   const wins  = db.winners.filter(w => String(w.raffleId) === String(currentDrawRaffle.id));
