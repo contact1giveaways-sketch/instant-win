@@ -389,7 +389,7 @@ select option{background:#222}
   <!-- TABS -->
   <div class="tabs">
     <button class="tab active" onclick="switchTab('enter',this)">🎟️ Enter Draw</button>
-    <button class="tab" onclick="switchTab('draw',this)">🎰 Live Draw</button>
+    <button class="tab" onclick="switchTab('draw',this)">🔴 Live Draw</button>
     <button class="tab" onclick="switchTab('winners',this)">🏆 Winners</button>
   </div>
 
@@ -423,48 +423,32 @@ select option{background:#222}
     </div>
   </div>
 
-  <!-- ════════════ LIVE DRAW ════════════ -->
+  <!-- ════════════ LIVE DRAW (SPECTATOR) ════════════ -->
   <div id="sec-draw" class="section">
-    <div class="card">
-      <label>Select Raffle</label>
-      <select id="draw-raffle-select" onchange="loadDrawRaffle()">
-        <option value="">— Choose a raffle —</option>
-      </select>
+    <div class="card" style="text-align:center;padding:36px 24px;">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">🔴 LIVE DRAW</div>
+      <div id="spectator-raffle" style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);letter-spacing:2px;margin-bottom:4px;">—</div>
+      <div id="spectator-prize" style="font-size:13px;color:var(--muted);margin-bottom:28px;">Waiting for the draw to start...</div>
+      <div class="slot-wrap" id="spec-slot-wrap" style="margin:0 auto 20px;">
+        <div class="highlight-line"></div>
+        <div class="slot-reel" id="spec-slot-reel">STANDBY</div>
+      </div>
+      <div id="spec-status-badge" style="display:inline-block;padding:8px 22px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;background:rgba(255,255,255,0.05);color:var(--muted);margin-bottom:20px;">
+        ⏳ Waiting for draw
+      </div>
+      <div id="spec-winner-reveal" class="winner-reveal">
+        <div class="winner-emoji">🏆</div>
+        <div class="winner-tag">Winner!</div>
+        <div class="winner-name" id="spec-wname"></div>
+        <div class="winner-prize-txt" id="spec-wprize"></div>
+      </div>
     </div>
-
-    <div id="draw-area" style="display:none">
-      <div class="stats-row">
-        <div class="stat-box"><div class="stat-val" id="stat-participants">0</div><div class="stat-lbl">Participants</div></div>
-        <div class="stat-box"><div class="stat-val" id="stat-prizes">0</div><div class="stat-lbl">Prizes Left</div></div>
-        <div class="stat-box"><div class="stat-val" id="stat-drawn">0</div><div class="stat-lbl">Drawn</div></div>
-      </div>
-
-      <div class="card">
-        <div class="draw-hero">
-          <div class="draw-headline">INSTANT WIN</div>
-          <div class="draw-prize-label" id="draw-prize-label">Select a prize below</div>
-
-          <div class="prize-slots" id="prize-chips"></div>
-
-          <div class="slot-wrap" id="slot-wrap">
-            <div class="highlight-line"></div>
-            <div class="slot-reel" id="slot-reel">READY</div>
-          </div>
-
-          <button class="btn btn-gold" id="draw-btn" onclick="startDraw()" disabled>🎰 DRAW NOW</button>
-        </div>
-
-        <div id="winner-reveal" class="winner-reveal">
-          <div class="winner-emoji">🏆</div>
-          <div class="winner-tag">Winner</div>
-          <div class="winner-name" id="wname"></div>
-          <div class="winner-prize-txt" id="wprize"></div>
-        </div>
-      </div>
+    <div class="card" style="text-align:center;padding:14px;">
+      <div style="font-size:12px;color:var(--muted);">Updates automatically every second 🦁</div>
     </div>
   </div>
 
-  <!-- ════════════ WINNERS ════════════ -->
+    <!-- ════════════ WINNERS ════════════ -->
   <div id="sec-winners" class="section">
     <div class="card">
       <div class="sec-head">
@@ -476,7 +460,10 @@ select option{background:#222}
     </div>
     <div id="winners-list"></div>
   </div>
+
+
 </div><!-- /wrap -->
+
 
 <script>
 // ════════════════════════════════════════════════════════
@@ -570,7 +557,8 @@ function switchTab(name, btn) {
   btn.classList.add("active");
   document.getElementById("sec-" + name).classList.add("active");
 
-  if (name === "draw")    { populateDrawDropdown(); }
+  if (name === "draw")    { populateDrawDropdown(); startSpectatorPolling(); }
+  else { stopSpectatorPolling(); }
   if (name === "winners") { loadWinners(); }
   if (name === "admin" && adminPass) { renderAdminPanel(); }
 }
@@ -667,79 +655,83 @@ function resetSlot() {
   document.getElementById("draw-btn").disabled = !selectedPrize || isDrawing;
 }
 
-async function startDraw() {
-  if (!currentDrawRaffle || !selectedPrize || isDrawing) return;
 
-  const pass = "giveaways2024"; // embedded for public draw page
+// ════════════════════════════════════════════════════════
+//  SPECTATOR POLLING — reads draw status from Sheets
+// ════════════════════════════════════════════════════════
+let specPollInterval = null;
+let lastSpecStatus = "idle";
+let specSpinInterval = null;
 
-  const parts = db.participants.filter(p => String(p.raffleId) === String(currentDrawRaffle.id));
-  const wins  = db.winners.filter(w => String(w.raffleId) === String(currentDrawRaffle.id));
-  const eligible = parts.filter(p => !wins.find(w => w.username === p.username));
-
-  if (!eligible.length) return alert("No eligible participants for this draw.");
-
-  isDrawing = true;
-  document.getElementById("draw-btn").disabled = true;
-  document.getElementById("winner-reveal").classList.remove("show");
-
-  const winner = eligible[Math.floor(Math.random() * eligible.length)];
-
-  // Spin animation
-  const wrap = document.getElementById("slot-wrap");
-  const reel = document.getElementById("slot-reel");
-  wrap.classList.add("slot-spinning");
-
-  const names = eligible.map(p => p.username);
-  let tick = 0;
-  spinInterval = setInterval(() => {
-    reel.textContent = names[tick % names.length];
-    tick++;
-  }, 80);
-
-  await sleep(3000);
-
-  clearInterval(spinInterval);
-  wrap.classList.remove("slot-spinning");
-
-  // Slowdown
-  for (let i = 0; i < 6; i++) {
-    reel.textContent = names[Math.floor(Math.random() * names.length)];
-    await sleep(120 + i * 80);
-  }
-
-  reel.textContent = winner.username;
-
-  // Save to sheets
-  const d = await apiPost({
-    action:"recordWinner",
-    password: pass,
-    username: winner.username,
-    prize: selectedPrize,
-    raffleId: currentDrawRaffle.id,
-    raffleName: currentDrawRaffle.name
-  });
-
-  if (d.error) {
-    alert("Error: " + d.error);
-    isDrawing = false;
-    resetSlot();
-    return;
-  }
-
-  // Reveal
-  document.getElementById("wname").textContent = winner.username;
-  document.getElementById("wprize").textContent = selectedPrize;
-  document.getElementById("winner-reveal").classList.add("show");
-  launchConfetti();
-
-  // Refresh
-  await fetchRaffles();
-  await fetchWinners(currentDrawRaffle.id);
-  selectedPrize = null;
-  isDrawing = false;
-  renderDrawUI();
-  document.getElementById("draw-btn").disabled = true;
+async function startSpectatorPolling() {
+  if (specPollInterval) return;
+  await pollDrawStatus();
+  specPollInterval = setInterval(pollDrawStatus, 1200);
 }
+
+function stopSpectatorPolling() {
+  clearInterval(specPollInterval); specPollInterval = null;
+  clearInterval(specSpinInterval); specSpinInterval = null;
+}
+
+async function pollDrawStatus() {
+  try {
+    const d = await apiFetch({ action: "getDrawStatus" });
+    handleSpecStatus(d);
+  } catch(e) {}
+}
+
+function handleSpecStatus(d) {
+  const status = d.status || "idle";
+  const reel   = document.getElementById("spec-slot-reel");
+  const wrap   = document.getElementById("spec-slot-wrap");
+  const badge  = document.getElementById("spec-status-badge");
+  const reveal = document.getElementById("spec-winner-reveal");
+  if (!reel) return;
+
+  if (d.raffleName) document.getElementById("spectator-raffle").textContent = d.raffleName;
+  if (d.prize)      document.getElementById("spectator-prize").textContent = "Prize: " + d.prize;
+
+  if (status === "spinning" && lastSpecStatus !== "spinning") {
+    lastSpecStatus = "spinning";
+    reveal.classList.remove("show");
+    badge.innerHTML = "🎰 Drawing now...";
+    badge.style.background = "rgba(245,200,66,0.15)";
+    badge.style.color = "var(--gold)";
+    wrap.classList.add("slot-spinning");
+    let names = db.participants.length > 0 ? db.participants.map(p => p.username) : ["Player1","Player2","Player3","Player4","Player5"];
+    let tick = 0;
+    clearInterval(specSpinInterval);
+    specSpinInterval = setInterval(() => { reel.textContent = names[tick++ % names.length]; }, 80);
+
+  } else if (status === "winner" && lastSpecStatus !== "winner") {
+    lastSpecStatus = "winner";
+    clearInterval(specSpinInterval); specSpinInterval = null;
+    wrap.classList.remove("slot-spinning");
+    reel.textContent = d.winner || "🏆";
+    badge.innerHTML = "🏆 We have a winner!";
+    badge.style.background = "rgba(34,197,94,0.15)";
+    badge.style.color = "var(--green)";
+    document.getElementById("spec-wname").textContent = d.winner || "";
+    document.getElementById("spec-wprize").textContent = d.prize || "";
+    reveal.classList.add("show");
+    launchConfetti();
+    fetchWinners();
+
+  } else if (status === "idle" && lastSpecStatus !== "idle") {
+    lastSpecStatus = "idle";
+    clearInterval(specSpinInterval); specSpinInterval = null;
+    wrap.classList.remove("slot-spinning");
+    reel.textContent = "STANDBY";
+    badge.innerHTML = "⏳ Waiting for draw";
+    badge.style.background = "rgba(255,255,255,0.05)";
+    badge.style.color = "var(--muted)";
+    document.getElementById("spectator-raffle").textContent = "—";
+    document.getElementById("spectator-prize").textContent = "Waiting for the draw to start...";
+    reveal.classList.remove("show");
+  }
+}
+
 
 // ════════════════════════════════════════════════════════
 //  WINNERS
@@ -780,26 +772,6 @@ function renderWinners() {
       <span class="badge badge-green">Won</span>
     </div>`).join("");
 }
-
-// ════════════════════════════════════════════════════════
-//  ADMIN
-// ════════════════════════════════════════════════════════
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // ════════════════════════════════════════════════════════
