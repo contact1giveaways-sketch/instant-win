@@ -485,12 +485,17 @@ let spinInterval = null;
 //  INIT
 // ════════════════════════════════════════════════════════
 document.addEventListener("DOMContentLoaded", async () => {
+  // Safety net: always hide loading after 5 seconds
+  setTimeout(() => { document.getElementById("loading").style.display = "none"; }, 5000);
+  
   if (API_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
     document.getElementById("config-banner").style.display = "block";
     document.getElementById("loading").style.display = "none";
     return;
   }
-  await refreshAll();
+  try {
+    await refreshAll();
+  } catch(e) { console.error("Init error:", e); }
   document.getElementById("loading").style.display = "none";
 });
 
@@ -595,6 +600,7 @@ async function registerEntry() {
 // ════════════════════════════════════════════════════════
 function populateDrawDropdown() {
   const sel = document.getElementById("draw-raffle-select");
+  if (!sel) return; // spectator mode - element doesn't exist
   const active = db.raffles.filter(r => r.active);
   sel.innerHTML = '<option value="">— Choose a raffle —</option>' +
     active.map(r => `<option value="${r.id}">${r.name}</option>`).join("");
@@ -738,6 +744,7 @@ function handleSpecStatus(d) {
 // ════════════════════════════════════════════════════════
 function populateWinnersFilter() {
   const sel = document.getElementById("winners-filter");
+  if (!sel) return;
   sel.innerHTML = '<option value="">All Raffles</option>' +
     db.raffles.map(r => `<option value="${r.id}">${r.name}</option>`).join("");
 }
