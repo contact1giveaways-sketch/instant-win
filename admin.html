@@ -761,6 +761,10 @@ async function startDraw() {
 
   const winner = eligible[Math.floor(Math.random() * eligible.length)];
 
+  // Broadcast: spinning started
+  await apiPost({ action:"setDrawStatus", password:pass, status:"spinning",
+    raffleName: currentDrawRaffle.name, prize: selectedPrize, winner:"" });
+
   // Spin animation
   const wrap = document.getElementById("slot-wrap");
   const reel = document.getElementById("slot-reel");
@@ -786,7 +790,7 @@ async function startDraw() {
 
   reel.textContent = winner.username;
 
-  // Save to sheets
+  // Save winner to sheets
   const d = await apiPost({
     action:"recordWinner",
     password: pass,
@@ -798,16 +802,26 @@ async function startDraw() {
 
   if (d.error) {
     alert("Error: " + d.error);
+    await apiPost({ action:"setDrawStatus", password:pass, status:"idle", raffleName:"", prize:"", winner:"" });
     isDrawing = false;
     resetSlot();
     return;
   }
 
-  // Reveal
+  // Broadcast: winner revealed
+  await apiPost({ action:"setDrawStatus", password:pass, status:"winner",
+    raffleName: currentDrawRaffle.name, prize: selectedPrize, winner: winner.username });
+
+  // Reveal locally
   document.getElementById("wname").textContent = winner.username;
   document.getElementById("wprize").textContent = selectedPrize;
   document.getElementById("winner-reveal").classList.add("show");
   launchConfetti();
+
+  // After 15 seconds, reset status to idle
+  setTimeout(async () => {
+    await apiPost({ action:"setDrawStatus", password:pass, status:"idle", raffleName:"", prize:"", winner:"" });
+  }, 15000);
 
   // Refresh
   await fetchRaffles();
