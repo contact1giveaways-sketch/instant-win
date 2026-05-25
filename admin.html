@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giveaways — Instant Win</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── VARIABLES ───────────────────────────────────────────── */
+:root {
+  --gold:      #F5C842;
+  --gold-dim:  #C49A1A;
+  --gold-glow: rgba(245,200,66,0.18);
+  --black:     #080808;
+  --surface:   #111111;
+  --card:      #161616;
+  --border:    rgba(255,255,255,0.07);
+  --text:      #E8E8E8;
+  --muted:     #555;
+  --green:     #22C55E;
+  --red:       #EF4444;
+  --blue:      #3B82F6;
+}
+
+/* ── RESET ───────────────────────────────────────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--black);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── BACKGROUND GRID ────────────────────────────────────── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(245,200,66,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(245,200,66,0.025) 1px,transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;z-index:0;
+}
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(245,200,66,0.07) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── LAYOUT ─────────────────────────────────────────────── */
+.wrap{max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+header{
+  padding:28px 0 24px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:36px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:14px}
+.logo-box{
+  width:44px;height:44px;
+  background:var(--gold);
+  border-radius:12px;
+  display:grid;place-items:center;
+  font-size:24px;
+  box-shadow:0 0 24px rgba(245,200,66,0.35);
+}
+.logo-name{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:20px;letter-spacing:3px;color:var(--gold);
+  line-height:1;
+}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+
+/* ── CONFIG BANNER ──────────────────────────────────────── */
+#config-banner{
+  background:rgba(239,68,68,0.1);
+  border:1px solid rgba(239,68,68,0.3);
+  border-radius:12px;
+  padding:14px 18px;
+  font-size:13px;color:var(--red);
+  margin-bottom:28px;
+  display:none;
+}
+#config-banner code{
+  background:rgba(239,68,68,0.15);
+  padding:2px 6px;border-radius:4px;
+  font-family:'DM Mono',monospace;font-size:12px;
+}
+
+/* ── TABS ───────────────────────────────────────────────── */
+.tabs{
+  display:flex;gap:4px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:5px;
+  margin-bottom:32px;
+}
+.tab{
+  flex:1;padding:10px 8px;
+  background:transparent;border:none;
+  color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;
+  border-radius:10px;cursor:pointer;
+  transition:all .2s;white-space:nowrap;
+}
+.tab:hover{color:var(--text)}
+.tab.active{
+  background:var(--card);
+  color:var(--gold);
+  box-shadow:0 2px 12px rgba(0,0,0,.4);
+}
+
+/* ── SECTION ────────────────────────────────────────────── */
+.section{display:none}
+.section.active{display:block}
+
+/* ── CARD ───────────────────────────────────────────────── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px;
+  margin-bottom:16px;
+}
+.card-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:18px;letter-spacing:2px;color:var(--gold);
+  margin-bottom:18px;
+}
+
+/* ── FORM ELEMENTS ──────────────────────────────────────── */
+label{display:block;font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;margin-top:14px}
+label:first-child{margin-top:0}
+input,select,textarea{
+  width:100%;padding:11px 14px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;
+  outline:none;transition:border-color .2s;
+  margin-bottom:4px;
+}
+input:focus,select:focus,textarea:focus{border-color:rgba(245,200,66,.4)}
+select option{background:#222}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:540px){.grid-2{grid-template-columns:1fr}}
+
+/* ── BUTTONS ────────────────────────────────────────────── */
+.btn{
+  padding:12px 22px;border:none;border-radius:10px;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
+  cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;
+}
+.btn-gold{
+  background:var(--gold);color:#000;
+  box-shadow:0 4px 20px rgba(245,200,66,.25);
+}
+.btn-gold:hover{background:#f7d155;transform:translateY(-1px);box-shadow:0 6px 24px rgba(245,200,66,.35)}
+.btn-gold:active{transform:translateY(0)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-ghost:hover{border-color:rgba(245,200,66,.3);color:var(--gold)}
+.btn-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--red)}
+.btn-danger:hover{background:rgba(239,68,68,.2)}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-full{width:100%;justify-content:center;margin-top:16px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+
+/* ── ALERT ──────────────────────────────────────────────── */
+.alert{
+  padding:12px 16px;border-radius:10px;
+  font-size:13px;margin-bottom:16px;display:none;
+}
+.alert.show{display:block}
+.alert-success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green)}
+.alert-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--red)}
+.alert-info{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:var(--blue)}
+
+/* ── STATS ROW ──────────────────────────────────────────── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.stat-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:16px;text-align:center;
+}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);line-height:1}
+.stat-lbl{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+
+/* ── DRAW MACHINE ───────────────────────────────────────── */
+.draw-hero{text-align:center;padding:32px 24px}
+.draw-headline{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:48px;letter-spacing:4px;
+  background:linear-gradient(135deg,var(--gold),#fff,var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1;margin-bottom:6px;
+}
+.draw-prize-label{font-size:13px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:28px}
+
+/* Prize slots */
+.prize-slots{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:28px}
+.prize-chip{
+  padding:7px 16px;border-radius:20px;
+  font-size:13px;font-weight:500;
+  border:1px solid rgba(245,200,66,.25);
+  background:rgba(245,200,66,.06);color:var(--gold);
+  cursor:pointer;transition:all .2s;
+}
+.prize-chip.selected{background:var(--gold);color:#000;border-color:var(--gold)}
+.prize-chip.won{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.3);color:var(--green);cursor:default}
+
+/* Slot machine */
+.slot-wrap{
+  width:260px;height:72px;
+  margin:0 auto 28px;
+  border:2px solid rgba(245,200,66,.25);
+  border-radius:14px;
+  background:var(--surface);
+  overflow:hidden;position:relative;
+}
+.slot-wrap::before,.slot-wrap::after{
+  content:'';position:absolute;left:0;right:0;height:24px;z-index:2;pointer-events:none;
+}
+.slot-wrap::before{top:0;background:linear-gradient(var(--surface),transparent)}
+.slot-wrap::after{bottom:0;background:linear-gradient(transparent,var(--surface))}
+.slot-reel{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:100%;text-align:center;
+  font-family:'DM Mono',monospace;font-size:16px;font-weight:500;
+  color:var(--gold);letter-spacing:1px;
+  transition:none;
+}
+.slot-spinning .slot-reel{animation:spin .07s linear infinite}
+@keyframes spin{
+  0%{transform:translateY(-50%) scaleY(1)}
+  50%{transform:translateY(-50%) scaleY(0)}
+  100%{transform:translateY(-50%) scaleY(1)}
+}
+.highlight-line{
+  position:absolute;top:50%;left:10px;right:10px;
+  transform:translateY(-50%);height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:.5;
+}
+
+/* Winner reveal */
+.winner-reveal{
+  background:linear-gradient(135deg,rgba(245,200,66,.12),rgba(245,200,66,.04));
+  border:1px solid rgba(245,200,66,.3);
+  border-radius:16px;padding:24px;
+  text-align:center;margin-top:20px;
+  display:none;
+  animation:fadeUp .4s ease;
+}
+.winner-reveal.show{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.winner-emoji{font-size:42px;margin-bottom:10px}
+.winner-tag{font-size:11px;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+.winner-name{font-family:'Bebas Neue',sans-serif;font-size:36px;color:#fff;letter-spacing:2px;margin:6px 0}
+.winner-prize-txt{font-size:16px;color:var(--gold);font-weight:500}
+
+/* ── LIST ITEMS ─────────────────────────────────────────── */
+.list-item{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 16px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;margin-bottom:8px;
+  transition:border-color .2s;
+}
+.list-item:hover{border-color:rgba(245,200,66,.15)}
+.li-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dim));
+  display:grid;place-items:center;
+  font-size:14px;font-weight:700;color:#000;flex-shrink:0;
+}
+.li-main{flex:1;min-width:0}
+.li-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.li-right{text-align:right;flex-shrink:0}
+.li-prize{font-size:13px;color:var(--gold);font-weight:500}
+.li-date{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ── BADGE ──────────────────────────────────────────────── */
+.badge{
+  padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600;
+  letter-spacing:.5px;text-transform:uppercase;
+}
+.badge-green{background:rgba(34,197,94,.12);color:var(--green)}
+.badge-gold{background:rgba(245,200,66,.12);color:var(--gold)}
+.badge-muted{background:rgba(255,255,255,.06);color:var(--muted)}
+
+/* ── ADMIN TABLE ────────────────────────────────────────── */
+.raffle-row{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;margin-bottom:8px;
+}
+.raffle-row .rr-name{flex:1;font-weight:600;font-size:14px}
+.raffle-row .rr-prizes{font-size:12px;color:var(--muted)}
+.raffle-actions{display:flex;gap:6px}
+
+/* Prize inputs */
+.prize-inputs-wrap{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.prize-input-row{display:flex;align-items:center;gap:8px}
+.prize-input-row span{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--gold);color:#000;
+  font-size:12px;font-weight:700;
+  display:grid;place-items:center;flex-shrink:0;
+}
+.prize-input-row input{margin:0}
+
+/* ── EMPTY STATE ────────────────────────────────────────── */
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-icon{font-size:36px;margin-bottom:12px;opacity:.5}
+.empty-text{font-size:14px}
+
+/* ── SECTION HEADER ─────────────────────────────────────── */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.count-pill{
+  background:rgba(245,200,66,.12);color:var(--gold);
+  font-size:11px;font-weight:700;padding:3px 10px;border-radius:8px;
+}
+
+/* ── SPINNER ────────────────────────────────────────────── */
+.spinner{
+  width:20px;height:20px;border:2px solid rgba(245,200,66,.2);
+  border-top-color:var(--gold);border-radius:50%;
+  animation:rotate .7s linear infinite;display:inline-block;
+}
+@keyframes rotate{to{transform:rotate(360deg)}}
+
+/* ── LOADING OVERLAY ────────────────────────────────────── */
+#loading{
+  position:fixed;inset:0;background:rgba(8,8,8,.85);
+  display:grid;place-items:center;z-index:100;
+}
+#loading .ld-inner{text-align:center}
+#loading .ld-spinner{width:40px;height:40px;border:3px solid rgba(245,200,66,.2);border-top-color:var(--gold);border-radius:50%;animation:rotate .7s linear infinite;margin:0 auto 16px}
+#loading .ld-text{color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px}
+
+/* ── CONFETTI ───────────────────────────────────────────── */
+.confetti{position:fixed;width:9px;height:9px;border-radius:2px;pointer-events:none;z-index:999;animation:cf linear forwards}
+@keyframes cf{0%{transform:translateY(-80px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+/* ── ENTER SECTION ──────────────────────────────────────── */
+.how-steps{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.how-step{display:flex;align-items:center;gap:14px;padding:12px;background:var(--surface);border-radius:10px}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--gold);color:#000;font-weight:700;font-size:13px;display:grid;place-items:center;flex-shrink:0}
+.step-txt{font-size:13px;color:var(--text)}
+
+/* ── SCROLLBAR ──────────────────────────────────────────── */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="ld-inner">
+    <div class="ld-spinner"></div>
+    <div class="ld-text">Loading...</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <div class="logo-box">🎁</div>
+      <div>
+        <div class="logo-name">Giveaways</div>
+        <div class="logo-sub">Instant Win Platform</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Config banner (shown if API_URL not set) -->
+  <div id="config-banner">
+    ⚠️ Configure your Google Apps Script URL: open this file and set <code>API_URL</code> at the top of the script.
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('enter',this)">🎟️ Enter Draw</button>
+    <button class="tab" onclick="switchTab('draw',this)">🎰 Live Draw</button>
+    <button class="tab" onclick="switchTab('winners',this)">🏆 Winners</button>
+    <button class="tab" onclick="switchTab('admin',this)">⚙️ Admin</button>
+  </div>
+
+  <!-- ════════════ ENTER ════════════ -->
+  <div id="sec-enter" class="section active">
+    <div class="card">
+      <div class="card-title">Register Your Entry</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">Already bought tickets on Raffall? Register your username below to enter the Instant Win draw.</p>
+
+      <div id="enter-alert" class="alert"></div>
+
+      <label>Your Raffall Username</label>
+      <input type="text" id="enter-username" placeholder="e.g. john_doe123" />
+
+      <label>Select Raffle</label>
+      <select id="enter-raffle">
+        <option value="">— Loading raffles... —</option>
+      </select>
+
+      <button class="btn btn-gold btn-full" onclick="registerEntry()">✅ Register My Entry</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">How It Works</div>
+      <div class="how-steps">
+        <div class="how-step"><div class="step-num">1</div><div class="step-txt">Buy tickets on <strong>Raffall.com</strong> for any of our active raffles</div></div>
+        <div class="how-step"><div class="step-num">2</div><div class="step-txt">Come back here and register your <strong>Raffall username</strong></div></div>
+        <div class="how-step"><div class="step-num">3</div><div class="step-txt">Wait for the <strong>Live Draw</strong> — watch it spin live!</div></div>
+        <div class="how-step"><div class="step-num">4</div><div class="step-txt">If you win, we pay your prize <strong>within 24 hours 🏆</strong></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ LIVE DRAW ════════════ -->
+  <div id="sec-draw" class="section">
+    <div class="card">
+      <label>Select Raffle</label>
+      <select id="draw-raffle-select" onchange="loadDrawRaffle()">
+        <option value="">— Choose a raffle —</option>
+      </select>
+    </div>
+
+    <div id="draw-area" style="display:none">
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-val" id="stat-participants">0</div><div class="stat-lbl">Participants</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-prizes">0</div><div class="stat-lbl">Prizes Left</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-drawn">0</div><div class="stat-lbl">Drawn</div></div>
+      </div>
+
+      <div class="card">
+        <div class="draw-hero">
+          <div class="draw-headline">INSTANT WIN</div>
+          <div class="draw-prize-label" id="draw-prize-label">Select a prize below</div>
+
+          <div class="prize-slots" id="prize-chips"></div>
+
+          <div class="slot-wrap" id="slot-wrap">
+            <div class="highlight-line"></div>
+            <div class="slot-reel" id="slot-reel">READY</div>
+          </div>
+
+          <button class="btn btn-gold" id="draw-btn" onclick="startDraw()" disabled>🎰 DRAW NOW</button>
+        </div>
+
+        <div id="winner-reveal" class="winner-reveal">
+          <div class="winner-emoji">🏆</div>
+          <div class="winner-tag">Winner</div>
+          <div class="winner-name" id="wname"></div>
+          <div class="winner-prize-txt" id="wprize"></div>
+        </div>
+      </div>
+
+      <!-- Admin auth for draw -->
+      <div class="card" id="draw-auth-card">
+        <div class="card-title">Admin Authentication</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Enter admin password to confirm the draw result.</p>
+        <label>Password</label>
+        <input type="password" id="draw-password" placeholder="Admin password" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ WINNERS ════════════ -->
+  <div id="sec-winners" class="section">
+    <div class="card">
+      <div class="sec-head">
+        <div class="card-title" style="margin-bottom:0">Past Winners</div>
+        <select id="winners-filter" onchange="loadWinners()" style="width:auto;margin:0;padding:8px 12px;font-size:12px">
+          <option value="">All Raffles</option>
+        </select>
+      </div>
+    </div>
+    <div id="winners-list"></div>
+  </div>
+
+  <!-- ════════════ ADMIN ════════════ -->
+  <div id="sec-admin" class="section">
+    <!-- Login gate -->
+    <div id="admin-login" class="card">
+      <div class="card-title">Admin Login</div>
+      <div id="login-alert" class="alert"></div>
+      <label>Password</label>
+      <input type="password" id="admin-pass-input" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')adminLogin()" />
+      <button class="btn btn-gold btn-full" onclick="adminLogin()">🔐 Login</button>
+    </div>
+
+    <!-- Admin panel (hidden until login) -->
+    <div id="admin-panel" style="display:none">
+
+      <!-- Create raffle -->
+      <div class="card">
+        <div class="card-title">Create New Raffle</div>
+        <div id="create-alert" class="alert"></div>
+        <div class="grid-2">
+          <div>
+            <label>Raffle Name</label>
+            <input type="text" id="new-name" placeholder="e.g. £1,000 Cash Pool" />
+          </div>
+          <div>
+            <label>Raffall Link</label>
+            <input type="text" id="new-link" placeholder="https://raffall.com/..." />
+          </div>
+        </div>
+
+        <label>Number of Prizes</label>
+        <select id="new-prize-count" onchange="renderPrizeInputs()">
+          <option value="1">1 Prize</option>
+          <option value="2">2 Prizes</option>
+          <option value="3">3 Prizes</option>
+          <option value="4">4 Prizes</option>
+          <option value="5">5 Prizes</option>
+        </select>
+
+        <div id="prize-inputs-wrap" class="prize-inputs-wrap"></div>
+
+        <button class="btn btn-gold btn-full" onclick="createRaffle()">✅ Create Raffle</button>
+      </div>
+
+      <!-- Active raffles -->
+      <div class="card">
+        <div class="sec-head">
+          <div class="card-title" style="margin-bottom:0">Active Raffles</div>
+          <span class="count-pill" id="admin-raffle-count">0</span>
+        </div>
+        <div id="admin-raffles"></div>
+      </div>
+
+      <!-- Participants -->
+      <div class="card">
+        <div class="sec-head">
+          <div class="card-title" style="margin-bottom:0">Participants</div>
+          <select id="part-filter" onchange="loadParticipants()" style="width:auto;margin:0;padding:8px 12px;font-size:12px">
+            <option value="">All Raffles</option>
+          </select>
+        </div>
+        <div id="participants-list"></div>
+      </div>
+
+    </div><!-- /admin-panel -->
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+// ════════════════════════════════════════════════════════
+//  CONFIG — replace with your deployed Apps Script URL
+// ════════════════════════════════════════════════════════
+const API_URL = "https://script.google.com/macros/s/AKfycbyvynrLAdL8hPnbHGfCKnyC8zGz_UFLA5XjC3zchONx-VDxwxALUQz-zOrCmu9lJ02N/exec";
+
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+let db = { raffles: [], participants: [], winners: [] };
+let adminPass = "";
+let currentDrawRaffle = null;
+let selectedPrize = null;
+let isDrawing = false;
+let spinInterval = null;
+
+// ════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", async () => {
+  if (API_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
+    document.getElementById("config-banner").style.display = "block";
+    document.getElementById("loading").style.display = "none";
+    return;
+  }
+  await refreshAll();
+  document.getElementById("loading").style.display = "none";
+});
+
+async function refreshAll() {
+  await Promise.all([fetchRaffles(), fetchWinners()]);
+  populateEnterDropdown();
+  populateDrawDropdown();
+  populateWinnersFilter();
+}
+
+// ════════════════════════════════════════════════════════
+//  API HELPERS
+// ════════════════════════════════════════════════════════
+async function apiFetch(params) {
+  const url = API_URL + "?" + new URLSearchParams(params);
+  const r = await fetch(url);
+  return r.json();
+}
+
+async function apiPost(body) {
+  // Use GET to avoid CORS preflight issues with Google Apps Script
+  const action = body.action;
+  const params = new URLSearchParams({ action, body: JSON.stringify(body) });
+  const r = await fetch(API_URL + "?" + params);
+  return r.json();
+}
+
+async function fetchRaffles() {
+  try {
+    const d = await apiFetch({ action: "getRaffles" });
+    db.raffles = d.raffles || [];
+  } catch(e) { console.error(e); }
+}
+
+async function fetchParticipants(raffleId) {
+  try {
+    const params = { action: "getParticipants" };
+    if (raffleId) params.raffleId = raffleId;
+    const d = await apiFetch(params);
+    if (raffleId) {
+      db.participants = db.participants.filter(p => String(p.raffleId) !== String(raffleId));
+      db.participants.push(...(d.participants || []));
+    } else {
+      db.participants = d.participants || [];
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function fetchWinners(raffleId) {
+  try {
+    const params = { action: "getWinners" };
+    if (raffleId) params.raffleId = raffleId;
+    const d = await apiFetch(params);
+    db.winners = d.winners || [];
+  } catch(e) { console.error(e); }
+}
+
+// ════════════════════════════════════════════════════════
+//  TABS
+// ════════════════════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("sec-" + name).classList.add("active");
+
+  if (name === "draw")    { populateDrawDropdown(); }
+  if (name === "winners") { loadWinners(); }
+  if (name === "admin" && adminPass) { renderAdminPanel(); }
+}
+
+// ════════════════════════════════════════════════════════
+//  ENTER DRAW
+// ════════════════════════════════════════════════════════
+function populateEnterDropdown() {
+  const sel = document.getElementById("enter-raffle");
+  const active = db.raffles.filter(r => r.active);
+  sel.innerHTML = active.length
+    ? '<option value="">— Choose your raffle —</option>' + active.map(r => `<option value="${r.id}">${r.name}</option>`).join("")
+    : '<option value="">No active raffles</option>';
+}
+
+async function registerEntry() {
+  const username = document.getElementById("enter-username").value.trim();
+  const raffleId = document.getElementById("enter-raffle").value;
+  if (!username) return showAlert("enter-alert","error","Please enter your Raffall username.");
+  if (!raffleId) return showAlert("enter-alert","error","Please select a raffle.");
+
+  const raffle = db.raffles.find(r => String(r.id) === String(raffleId));
+  showAlert("enter-alert","info","Registering...");
+
+  const d = await apiPost({ action:"addParticipant", username, raffleId, raffleName: raffle?.name || "" });
+  if (d.error) return showAlert("enter-alert","error", d.error === "Already registered for this raffle" ? "You are already registered for this raffle." : d.error);
+  showAlert("enter-alert","success","✅ You're registered! Good luck 🍀");
+  document.getElementById("enter-username").value = "";
+  document.getElementById("enter-raffle").value = "";
+}
+
+// ════════════════════════════════════════════════════════
+//  LIVE DRAW
+// ════════════════════════════════════════════════════════
+function populateDrawDropdown() {
+  const sel = document.getElementById("draw-raffle-select");
+  const active = db.raffles.filter(r => r.active);
+  sel.innerHTML = '<option value="">— Choose a raffle —</option>' +
+    active.map(r => `<option value="${r.id}">${r.name}</option>`).join("");
+}
+
+async function loadDrawRaffle() {
+  const id = document.getElementById("draw-raffle-select").value;
+  document.getElementById("draw-area").style.display = id ? "block" : "none";
+  if (!id) return;
+
+  currentDrawRaffle = db.raffles.find(r => String(r.id) === String(id));
+  selectedPrize = null;
+  document.getElementById("winner-reveal").classList.remove("show");
+
+  await fetchParticipants(id);
+  await fetchWinners(id);
+  renderDrawUI();
+}
+
+function renderDrawUI() {
+  if (!currentDrawRaffle) return;
+  const parts = db.participants.filter(p => String(p.raffleId) === String(currentDrawRaffle.id));
+  const wins  = db.winners.filter(w => String(w.raffleId) === String(currentDrawRaffle.id));
+  const prizes = currentDrawRaffle.prizes || [];
+  const prizesDone = wins.length;
+
+  document.getElementById("stat-participants").textContent = parts.length;
+  document.getElementById("stat-prizes").textContent = prizes.length - prizesDone;
+  document.getElementById("stat-drawn").textContent = prizesDone;
+
+  // Chips
+  const chips = document.getElementById("prize-chips");
+  chips.innerHTML = prizes.map((p,i) => {
+    const won = wins.find(w => w.prize === p.label || String(w.prize) === String(p.label));
+    const cls = won ? "won" : (selectedPrize === p.label ? "selected" : "");
+    return `<div class="prize-chip ${cls}" onclick="${won ? '' : `selectPrize('${p.label.replace(/'/g,"\\'")}')`}">${won ? "✓ " : ""}${p.label}</div>`;
+  }).join("");
+
+  resetSlot();
+}
+
+function selectPrize(label) {
+  selectedPrize = label;
+  document.getElementById("draw-prize-label").textContent = label;
+  document.getElementById("draw-btn").disabled = false;
+  renderDrawUI();
+  // Re-select visual
+  document.querySelectorAll(".prize-chip").forEach(c => {
+    c.classList.toggle("selected", c.textContent.replace("✓ ","").trim() === label);
+  });
+}
+
+function resetSlot() {
+  const wrap = document.getElementById("slot-wrap");
+  const reel = document.getElementById("slot-reel");
+  wrap.classList.remove("slot-spinning");
+  reel.textContent = selectedPrize ? "READY" : "—";
+  document.getElementById("draw-btn").disabled = !selectedPrize || isDrawing;
+}
+
+async function startDraw() {
+  if (!currentDrawRaffle || !selectedPrize || isDrawing) return;
+
+  const pass = document.getElementById("draw-password").value;
+  if (!pass) return alert("Enter admin password first.");
+
+  const parts = db.participants.filter(p => String(p.raffleId) === String(currentDrawRaffle.id));
+  const wins  = db.winners.filter(w => String(w.raffleId) === String(currentDrawRaffle.id));
+  const eligible = parts.filter(p => !wins.find(w => w.username === p.username));
+
+  if (!eligible.length) return alert("No eligible participants for this draw.");
+
+  isDrawing = true;
+  document.getElementById("draw-btn").disabled = true;
+  document.getElementById("winner-reveal").classList.remove("show");
+
+  const winner = eligible[Math.floor(Math.random() * eligible.length)];
+
+  // Spin animation
+  const wrap = document.getElementById("slot-wrap");
+  const reel = document.getElementById("slot-reel");
+  wrap.classList.add("slot-spinning");
+
+  const names = eligible.map(p => p.username);
+  let tick = 0;
+  spinInterval = setInterval(() => {
+    reel.textContent = names[tick % names.length];
+    tick++;
+  }, 80);
+
+  await sleep(3000);
+
+  clearInterval(spinInterval);
+  wrap.classList.remove("slot-spinning");
+
+  // Slowdown
+  for (let i = 0; i < 6; i++) {
+    reel.textContent = names[Math.floor(Math.random() * names.length)];
+    await sleep(120 + i * 80);
+  }
+
+  reel.textContent = winner.username;
+
+  // Save to sheets
+  const d = await apiPost({
+    action:"recordWinner",
+    password: pass,
+    username: winner.username,
+    prize: selectedPrize,
+    raffleId: currentDrawRaffle.id,
+    raffleName: currentDrawRaffle.name
+  });
+
+  if (d.error) {
+    alert("Error: " + d.error);
+    isDrawing = false;
+    resetSlot();
+    return;
+  }
+
+  // Reveal
+  document.getElementById("wname").textContent = winner.username;
+  document.getElementById("wprize").textContent = selectedPrize;
+  document.getElementById("winner-reveal").classList.add("show");
+  launchConfetti();
+
+  // Refresh
+  await fetchRaffles();
+  await fetchWinners(currentDrawRaffle.id);
+  selectedPrize = null;
+  isDrawing = false;
+  renderDrawUI();
+  document.getElementById("draw-btn").disabled = true;
+}
+
+// ════════════════════════════════════════════════════════
+//  WINNERS
+// ════════════════════════════════════════════════════════
+function populateWinnersFilter() {
+  const sel = document.getElementById("winners-filter");
+  sel.innerHTML = '<option value="">All Raffles</option>' +
+    db.raffles.map(r => `<option value="${r.id}">${r.name}</option>`).join("");
+}
+
+async function loadWinners() {
+  const raffleId = document.getElementById("winners-filter").value;
+  await fetchWinners(raffleId || undefined);
+  renderWinners();
+}
+
+function renderWinners() {
+  const raffleId = document.getElementById("winners-filter").value;
+  const wins = raffleId ? db.winners.filter(w => String(w.raffleId) === String(raffleId)) : db.winners;
+  const el = document.getElementById("winners-list");
+
+  if (!wins.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🏆</div><div class="empty-text">No winners yet — the first draw is coming soon!</div></div>`;
+    return;
+  }
+
+  el.innerHTML = wins.slice().reverse().map((w,i) => `
+    <div class="list-item">
+      <div class="li-avatar">${w.username[0]?.toUpperCase() || "?"}</div>
+      <div class="li-main">
+        <div class="li-name">${esc(w.username)}</div>
+        <div class="li-sub">${esc(w.raffleName)}</div>
+      </div>
+      <div class="li-right">
+        <div class="li-prize">${esc(w.prize)}</div>
+        <div class="li-date">${fmtDate(w.drawnAt)}</div>
+      </div>
+      <span class="badge badge-green">Won</span>
+    </div>`).join("");
+}
+
+// ════════════════════════════════════════════════════════
+//  ADMIN
+// ════════════════════════════════════════════════════════
+async function adminLogin() {
+  const pass = document.getElementById("admin-pass-input").value;
+  if (!pass) return;
+  const d = await apiPost({ action: "checkAdmin", password: pass });
+  if (!d.ok) return showAlert("login-alert","error","Incorrect password.");
+  adminPass = pass;
+  document.getElementById("admin-login").style.display = "none";
+  document.getElementById("admin-panel").style.display = "block";
+  await fetchRaffles();
+  await fetchParticipants();
+  renderAdminPanel();
+  renderPrizeInputs();
+}
+
+async function renderAdminPanel() {
+  await fetchRaffles();
+  const el = document.getElementById("admin-raffles");
+  document.getElementById("admin-raffle-count").textContent = db.raffles.length;
+
+  if (!db.raffles.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No raffles yet</div></div>`;
+  } else {
+    el.innerHTML = db.raffles.map(r => `
+      <div class="raffle-row">
+        <div>
+          <div class="rr-name">${esc(r.name)}</div>
+          <div class="rr-prizes">${(r.prizes||[]).length} prize(s) • ${r.active ? '🟢 Active' : '🔴 Inactive'}</div>
+        </div>
+        <div class="raffle-actions">
+          <button class="btn btn-ghost btn-sm" onclick="toggleRaffle('${r.id}')">${r.active ? 'Deactivate' : 'Activate'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteRaffle('${r.id}')">Delete</button>
+        </div>
+      </div>`).join("");
+  }
+
+  populatePartFilter();
+  await loadParticipants();
+}
+
+function populatePartFilter() {
+  const sel = document.getElementById("part-filter");
+  sel.innerHTML = '<option value="">All Raffles</option>' +
+    db.raffles.map(r => `<option value="${r.id}">${r.name}</option>`).join("");
+}
+
+async function loadParticipants() {
+  const raffleId = document.getElementById("part-filter")?.value;
+  await fetchParticipants(raffleId || undefined);
+  renderParticipants();
+}
+
+function renderParticipants() {
+  const raffleId = document.getElementById("part-filter")?.value;
+  const parts = raffleId
+    ? db.participants.filter(p => String(p.raffleId) === String(raffleId))
+    : db.participants;
+  const el = document.getElementById("participants-list");
+
+  if (!parts.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">👥</div><div class="empty-text">No participants yet</div></div>`;
+    return;
+  }
+  el.innerHTML = parts.map(p => {
+    const won = db.winners.find(w => String(w.raffleId) === String(p.raffleId) && w.username === p.username);
+    return `
+      <div class="list-item">
+        <div class="li-avatar">${p.username[0]?.toUpperCase() || "?"}</div>
+        <div class="li-main">
+          <div class="li-name">${esc(p.username)}</div>
+          <div class="li-sub">${esc(p.raffleName)}</div>
+        </div>
+        <div class="li-right"><div class="li-date">${fmtDate(p.registeredAt)}</div></div>
+        <span class="badge ${won ? 'badge-green' : 'badge-muted'}">${won ? '🏆 Won' : 'Entered'}</span>
+      </div>`;
+  }).join("");
+}
+
+function renderPrizeInputs() {
+  const count = parseInt(document.getElementById("new-prize-count")?.value || 1);
+  const wrap = document.getElementById("prize-inputs-wrap");
+  if (!wrap) return;
+  let html = "";
+  for (let i = 1; i <= count; i++) {
+    html += `<div class="prize-input-row"><span>${i}</span><input type="text" id="prize-${i}" placeholder="e.g. £50 Amazon voucher" /></div>`;
+  }
+  wrap.innerHTML = html;
+}
+
+async function createRaffle() {
+  const name = document.getElementById("new-name").value.trim();
+  const link = document.getElementById("new-link").value.trim();
+  const count = parseInt(document.getElementById("new-prize-count").value);
+
+  if (!name) return showAlert("create-alert","error","Please enter a raffle name.");
+
+  const prizes = [];
+  for (let i = 1; i <= count; i++) {
+    const v = document.getElementById("prize-" + i)?.value.trim();
+    if (!v) return showAlert("create-alert","error","Fill in all prize descriptions.");
+    prizes.push({ label: v, won: false });
+  }
+
+  showAlert("create-alert","info","Creating...");
+  const d = await apiPost({ action:"createRaffle", password:adminPass, name, link, prizes });
+  if (d.error) return showAlert("create-alert","error", d.error);
+
+  showAlert("create-alert","success","✅ Raffle created!");
+  document.getElementById("new-name").value = "";
+  document.getElementById("new-link").value = "";
+  await fetchRaffles();
+  renderAdminPanel();
+  populateEnterDropdown();
+  populateDrawDropdown();
+  populateWinnersFilter();
+}
+
+async function deleteRaffle(id) {
+  if (!confirm("Delete this raffle? This cannot be undone.")) return;
+  await apiPost({ action:"deleteRaffle", password:adminPass, id });
+  await fetchRaffles();
+  renderAdminPanel();
+  populateEnterDropdown();
+  populateDrawDropdown();
+}
+
+async function toggleRaffle(id) {
+  await apiPost({ action:"toggleRaffle", password:adminPass, id });
+  await fetchRaffles();
+  renderAdminPanel();
+  populateEnterDropdown();
+  populateDrawDropdown();
+}
+
+// ════════════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════════════
+function showAlert(id, type, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `alert alert-${type} show`;
+  el.textContent = msg;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove("show"), 5000);
+}
+
+function esc(s) {
+  return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function fmtDate(s) {
+  if (!s) return "";
+  const d = new Date(s);
+  return isNaN(d) ? s : d.toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function launchConfetti() {
+  const colors = ["#F5C842","#ffffff","#22C55E","#3B82F6","#F97316"];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const el = document.createElement("div");
+      el.className = "confetti";
+      el.style.cssText = `
+        left:${Math.random()*100}vw;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;
+        animation-duration:${2+Math.random()*2}s;
+        border-radius:${Math.random()>.5?"50%":"2px"};
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4500);
+    }, Math.random() * 800);
+  }
+}
+</script>
+</body>
+</html>
