@@ -390,6 +390,7 @@ select option{background:#222}
   <div class="tabs">
     <button class="tab active" onclick="switchTab('enter',this)">🎟️ Enter Draw</button>
     <button class="tab" onclick="switchTab('draw',this)">🔴 Live Draw</button>
+    <button class="tab" onclick="switchTab('participants',this)">👥 Participants</button>
     <button class="tab" onclick="switchTab('winners',this)">🏆 Winners</button>
   </div>
 
@@ -448,6 +449,19 @@ select option{background:#222}
     </div>
   </div>
 
+    <!-- ════════════ PARTICIPANTS ════════════ -->
+  <div id="sec-participants" class="section">
+    <div class="card">
+      <div class="sec-head">
+        <div class="card-title" style="margin-bottom:0">Participants</div>
+        <select id="pub-part-filter" onchange="loadPublicParticipants()" style="width:auto;margin:0;padding:8px 12px;font-size:12px">
+          <option value="">All Raffles</option>
+        </select>
+      </div>
+    </div>
+    <div id="pub-participants-list"></div>
+  </div>
+
     <!-- ════════════ WINNERS ════════════ -->
   <div id="sec-winners" class="section">
     <div class="card">
@@ -504,6 +518,7 @@ async function refreshAll() {
   populateEnterDropdown();
   populateDrawDropdown();
   populateWinnersFilter();
+  populatePubPartFilter();
 }
 
 // ════════════════════════════════════════════════════════
@@ -564,6 +579,7 @@ function switchTab(name, btn) {
 
   if (name === "draw")    { populateDrawDropdown(); startSpectatorPolling(); }
   else { stopSpectatorPolling(); }
+  if (name === "participants") { loadPublicParticipants(); }
   if (name === "winners") { loadWinners(); }
   if (name === "admin" && adminPass) { renderAdminPanel(); }
 }
@@ -823,6 +839,57 @@ function launchConfetti() {
     }, Math.random() * 800);
   }
 }
+
+// ════════════════════════════════════════════════════════
+//  PUBLIC PARTICIPANTS
+// ════════════════════════════════════════════════════════
+function populatePubPartFilter() {
+  const sel = document.getElementById("pub-part-filter");
+  if (!sel) return;
+  sel.innerHTML = '<option value="">All Raffles</option>' +
+    db.raffles.map(r => `<option value="${r.id}">${r.name}</option>`).join("");
+}
+
+async function loadPublicParticipants() {
+  const raffleId = document.getElementById("pub-part-filter")?.value;
+  await fetchParticipants(raffleId || undefined);
+  renderPublicParticipants();
+}
+
+function renderPublicParticipants() {
+  const raffleId = document.getElementById("pub-part-filter")?.value;
+  const parts = raffleId
+    ? db.participants.filter(p => String(p.raffleId) === String(raffleId))
+    : db.participants;
+  const el = document.getElementById("pub-participants-list");
+  if (!el) return;
+
+  if (!parts.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">👥</div><div class="empty-text">No participants yet — be the first to enter!</div></div>`;
+    return;
+  }
+
+  // Count pill
+  const header = document.querySelector("#sec-participants .count-pill");
+  
+  el.innerHTML = `<div style="text-align:right;margin-bottom:10px;font-size:12px;color:var(--muted);">${parts.length} participant${parts.length !== 1 ? 's' : ''}</div>` +
+    parts.slice().reverse().map((p, i) => {
+      const won = db.winners.find(w => String(w.raffleId) === String(p.raffleId) && w.username === p.username);
+      return `
+        <div class="list-item">
+          <div class="li-avatar">${p.username[0]?.toUpperCase() || "?"}</div>
+          <div class="li-main">
+            <div class="li-name">${esc(p.username)}</div>
+            <div class="li-sub">${esc(p.raffleName)}</div>
+          </div>
+          <div class="li-right">
+            <div class="li-date">${fmtDate(p.registeredAt)}</div>
+          </div>
+          <span class="badge ${won ? 'badge-green' : 'badge-muted'}">${won ? '🏆 Won' : 'Entered'}</span>
+        </div>`;
+    }).join("");
+}
+
 </script>
 </body>
 </html>
