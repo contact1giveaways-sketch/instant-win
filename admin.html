@@ -574,6 +574,7 @@ let db = { raffles: [], participants: [], winners: [] };
 let adminPass = "";
 let currentDrawRaffle = null;
 let selectedPrize = null;
+let selectedPrizeIndex = null;
 let isDrawing = false;
 let spinInterval = null;
 
@@ -702,6 +703,7 @@ async function loadDrawRaffle() {
 
   currentDrawRaffle = db.raffles.find(r => String(r.id) === String(id));
   selectedPrize = null;
+  selectedPrizeIndex = null;
   document.getElementById("winner-reveal").classList.remove("show");
 
   await fetchParticipants(id);
@@ -723,23 +725,24 @@ function renderDrawUI() {
   // Chips
   const chips = document.getElementById("prize-chips");
   chips.innerHTML = prizes.map((p,i) => {
-    const won = wins.find(w => w.prize === p.label || String(w.prize) === String(p.label));
-    const cls = won ? "won" : (selectedPrize === p.label ? "selected" : "");
-    return `<div class="prize-chip ${cls}" onclick="${won ? '' : `selectPrize('${p.label.replace(/'/g,"\\'")}')`}">${won ? "✓ " : ""}${p.label}</div>`;
+    const wonCount = wins.filter(w => w.prize === p.label).length;
+    const prizeWonCount = prizes.slice(0,i).filter(pp => pp.label === p.label).length;
+    const won = wonCount > prizeWonCount || p.won === true;
+    const cls = won ? "won" : (selectedPrizeIndex === i ? "selected" : "");
+    return `<div class="prize-chip ${cls}" onclick="${won ? '' : `selectPrize(${i})`}">${won ? "✓ " : ""}${p.label}</div>`;
   }).join("");
 
   resetSlot();
 }
 
-function selectPrize(label) {
-  selectedPrize = label;
-  document.getElementById("draw-prize-label").textContent = label;
+function selectPrize(index) {
+  const prizes = currentDrawRaffle ? (currentDrawRaffle.prizes || []) : [];
+  if (index < 0 || index >= prizes.length) return;
+  selectedPrize = prizes[index].label;
+  selectedPrizeIndex = index;
+  document.getElementById("draw-prize-label").textContent = prizes[index].label;
   document.getElementById("draw-btn").disabled = false;
   renderDrawUI();
-  // Re-select visual
-  document.querySelectorAll(".prize-chip").forEach(c => {
-    c.classList.toggle("selected", c.textContent.replace("✓ ","").trim() === label);
-  });
 }
 
 function resetSlot() {
